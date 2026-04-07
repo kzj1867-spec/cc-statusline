@@ -37,3 +37,4 @@ npm/**/*.tgz
 .claude/commands/
 .claude/skills/
 openspec/
+.claude/settings.local.json
