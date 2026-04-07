@@ -2,11 +2,10 @@
 //!
 //! Displays token usage information with cached transcript statistics and adaptive progress bars.
 
-use std::fmt::Write;
-
 use async_trait::async_trait;
 
 use super::base::{Component, ComponentFactory, ComponentOutput, RenderContext};
+use super::progress_bar::{self, ProgressBarParams};
 use crate::config::{BaseComponentConfig, Config, TokensComponentConfig};
 use crate::storage;
 use crate::utils::model_parser::parse_model_id;
@@ -110,10 +109,6 @@ impl TokensComponent {
         }
 
         let width = self.config.progress_width.max(1) as usize;
-        let width_f64 = to_f64(width);
-        let filled_len = clamp_round_to_usize((percentage / 100.0) * width_f64, width);
-        let capped_filled = filled_len.min(width);
-
         let gradient_enabled = self.config.show_gradient
             || matches!(ctx.config.theme.as_str(), "powerline" | "capsule");
         let supports_colors = ctx.terminal.supports_colors();
@@ -140,44 +135,18 @@ impl TokensComponent {
             .next()
             .unwrap_or('▓');
 
-        let mut bar = String::with_capacity(width * 16);
-        let mut color_active = false;
+        let params = ProgressBarParams {
+            percentage,
+            width,
+            filled_char,
+            empty_char,
+            backup_char,
+            backup_threshold: self.config.thresholds.backup,
+            gradient_enabled,
+            supports_colors,
+        };
 
-        for idx in 0..width {
-            if idx < capped_filled {
-                let gradient_percentage = if capped_filled == 0 {
-                    0.0
-                } else {
-                    let idx_f64 = to_f64(idx);
-                    let capped_filled_f64 = to_f64(capped_filled);
-
-                    ((idx_f64 + 0.5) / capped_filled_f64) * percentage
-                }
-                .clamp(0.0, 100.0);
-                let is_backup = gradient_percentage >= self.config.thresholds.backup;
-                let symbol = if is_backup { backup_char } else { filled_char };
-
-                if gradient_enabled && supports_colors {
-                    let (r, g, b) = rainbow_gradient_color(gradient_percentage);
-                    let _ = write!(bar, "\x1b[38;2;{r};{g};{b}m{symbol}");
-                    color_active = true;
-                } else {
-                    bar.push(symbol);
-                }
-            } else if gradient_enabled && supports_colors {
-                bar.push_str("\x1b[38;2;120;120;120m");
-                bar.push(empty_char);
-                color_active = true;
-            } else {
-                bar.push(empty_char);
-            }
-        }
-
-        if color_active {
-            bar.push_str("\x1b[0m");
-        }
-
-        Some(bar)
+        progress_bar::build_progress_bar(&params)
     }
 
     fn select_status_icon(&self, ctx: &RenderContext, percentage: f64) -> Option<String> {
@@ -244,8 +213,8 @@ impl TokensComponent {
         if self.config.show_raw_numbers {
             format!("({}/{})", info.used, info.total)
         } else {
-            let used_k = to_f64(info.used) / 1_000.0;
-            let total_k = to_f64(info.total) / 1_000.0;
+            let used_k = progress_bar::to_f64(info.used) / 1_000.0;
+            let total_k = progress_bar::to_f64(info.total) / 1_000.0;
             format!("({used_k:.1}k/{total_k:.0}k)")
         }
     }
@@ -271,7 +240,7 @@ impl Component for TokensComponent {
         };
 
         let total = usage.total.max(1);
-        let percentage = (to_f64(usage.used) / to_f64(total)) * 100.0;
+        let percentage = (progress_bar::to_f64(usage.used) / progress_bar::to_f64(total)) * 100.0;
         let clamped_percentage = percentage.clamp(0.0, 999.9);
 
         let mut parts = Vec::new();
@@ -316,80 +285,6 @@ fn icon_for_kind(set: &crate::config::TokenIconSetConfig, kind: TokenStatusKind)
 enum TokenStatusKind {
     Backup,
     Critical,
-}
-
-fn rainbow_gradient_color(percentage: f64) -> (u8, u8, u8) {
-    let p = percentage.clamp(0.0, 100.0);
-
-    let soft_green = (80.0, 200.0, 80.0);
-    let soft_yellow_green = (150.0, 200.0, 60.0);
-    let soft_yellow = (200.0, 200.0, 80.0);
-    let soft_orange = (220.0, 160.0, 60.0);
-    let soft_red = (200.0, 100.0, 80.0);
-
-    let lerp = |start: (f64, f64, f64), end: (f64, f64, f64), t: f64| {
-        let clamp_t = t.clamp(0.0, 1.0);
-        (
-            (end.0 - start.0).mul_add(clamp_t, start.0),
-            (end.1 - start.1).mul_add(clamp_t, start.1),
-            (end.2 - start.2).mul_add(clamp_t, start.2),
-        )
-    };
-
-    let (r, g, b) = if p <= 25.0 {
-        lerp(soft_green, soft_yellow_green, p / 25.0)
-    } else if p <= 50.0 {
-        lerp(soft_yellow_green, soft_yellow, (p - 25.0) / 25.0)
-    } else if p <= 75.0 {
-        lerp(soft_yellow, soft_orange, (p - 50.0) / 25.0)
-    } else {
-        lerp(soft_orange, soft_red, (p - 75.0) / 25.0)
-    };
-
-    let convert = |value: f64| -> u8 {
-        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-        {
-            value.clamp(0.0, 255.0).round() as u8
-        }
-    };
-
-    (convert(r), convert(g), convert(b))
-}
-
-fn clamp_round_to_usize(value: f64, max: usize) -> usize {
-    let max_f64 = to_f64(max);
-    let clamped = value.clamp(0.0, max_f64);
-
-    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-    let rounded = clamped.round() as usize;
-
-    rounded.min(max)
-}
-
-fn to_f64<T: IntoF64>(value: T) -> f64 {
-    value.into_f64()
-}
-
-trait IntoF64 {
-    fn into_f64(self) -> f64;
-}
-
-impl IntoF64 for usize {
-    fn into_f64(self) -> f64 {
-        #[allow(clippy::cast_precision_loss)]
-        {
-            self as f64
-        }
-    }
-}
-
-impl IntoF64 for u64 {
-    fn into_f64(self) -> f64 {
-        #[allow(clippy::cast_precision_loss)]
-        {
-            self as f64
-        }
-    }
 }
 
 /// Factory for creating Tokens components

@@ -23,6 +23,7 @@ const POWERLINE_PALETTE: &[(&str, &str)] = &[
     ("tokens", "yellow"),
     ("usage", "orange"),
     ("status", "magenta"),
+    ("rate_limit", "cyan"),
 ];
 
 const CAPSULE_PALETTE: &[(&str, &str)] = &[
@@ -32,6 +33,7 @@ const CAPSULE_PALETTE: &[(&str, &str)] = &[
     ("tokens", "yellow"),
     ("usage", "bright_orange"),
     ("status", "bright_magenta"),
+    ("rate_limit", "cyan"),
 ];
 
 /// Generator options
@@ -144,7 +146,8 @@ impl StatuslineGenerator {
     fn initialize_components(&mut self) {
         use crate::components::{
             BranchComponentFactory, ModelComponentFactory, ProjectComponentFactory,
-            StatusComponentFactory, TokensComponentFactory, UsageComponentFactory,
+            RateLimitComponentFactory, StatusComponentFactory, TokensComponentFactory,
+            UsageComponentFactory,
         };
 
         // Register all component factories
@@ -160,6 +163,10 @@ impl StatuslineGenerator {
             .insert("status".to_string(), Box::new(StatusComponentFactory));
         self.component_registry
             .insert("usage".to_string(), Box::new(UsageComponentFactory));
+        self.component_registry.insert(
+            "rate_limit".to_string(),
+            Box::new(RateLimitComponentFactory),
+        );
     }
 
     fn refresh_multiline_renderer(&mut self) {
@@ -205,6 +212,7 @@ impl StatuslineGenerator {
                 'T' => Some("tokens"),
                 'U' => Some("usage"),
                 'S' => Some("status"),
+                'R' => Some("rate_limit"),
                 _ => None,
             })
             .filter(|name| seen.insert(*name))
@@ -272,11 +280,16 @@ impl StatuslineGenerator {
         // Render components
         let component_results = self.render_components(&context).await?;
 
-        // Apply theme rendering
-        let colors = self.extract_component_colors(&component_results);
+        // Separate rate_limit output for independent line rendering
+        let (main_components, rate_limit_output): (Vec<_>, Vec<_>) = component_results
+            .into_iter()
+            .partition(|c| c.component_name.as_deref() != Some("rate_limit"));
+
+        // Apply theme rendering to main line components
+        let colors = self.extract_component_colors(&main_components);
         let main_line = self
             .theme_renderer
-            .render(&component_results, &colors, &context)?;
+            .render(&main_components, &colors, &context)?;
 
         // Render multiline extensions
         let extension_result = self
@@ -293,6 +306,13 @@ impl StatuslineGenerator {
             lines.extend(extension_result.lines);
         } else if let Some(err) = extension_result.error {
             eprintln!("[statusline] multiline render failed: {err}");
+        }
+
+        // Add rate_limit as independent line (not themed)
+        for rl in &rate_limit_output {
+            if rl.visible && !rl.text.is_empty() {
+                lines.push(rl.text.clone());
+            }
         }
 
         let result = lines.join("\n");
@@ -341,6 +361,7 @@ impl StatuslineGenerator {
             "tokens" => self.config.components.tokens.base.icon_color.clone(),
             "usage" => self.config.components.usage.base.icon_color.clone(),
             "status" => self.config.components.status.base.icon_color.clone(),
+            "rate_limit" => "cyan".to_string(),
             other => {
                 eprintln!(
                     "[statusline] unknown component '{other}' when resolving theme colors, fallback to blue"
@@ -384,6 +405,7 @@ impl StatuslineGenerator {
             "tokens".to_string(),
             "usage".to_string(),
             "status".to_string(),
+            "rate_limit".to_string(),
         ];
 
         let component_order = if self.config.components.order.is_empty() {

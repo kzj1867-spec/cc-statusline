@@ -213,6 +213,9 @@ pub struct ComponentsConfig {
 
     #[serde(default)]
     pub status: StatusComponentConfig,
+
+    #[serde(default)]
+    pub rate_limit: RateLimitComponentConfig,
 }
 
 /// Base component configuration
@@ -1250,4 +1253,198 @@ fn default_status_error_text() -> String {
 
 fn default_status_warning_text() -> String {
     "[WARN]".to_string()
+}
+
+// ==================== Rate Limit Component Config ====================
+
+/// Rate limit component configuration
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct RateLimitComponentConfig {
+    /// Whether to enable the rate limit component
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+
+    /// GLM usage API configuration
+    #[serde(default)]
+    pub glm_usage: GlmUsageConfig,
+
+    /// Display configuration
+    #[serde(default)]
+    pub display: RateLimitDisplayConfig,
+}
+
+impl Default for RateLimitComponentConfig {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            glm_usage: GlmUsageConfig::default(),
+            display: RateLimitDisplayConfig::default(),
+        }
+    }
+}
+
+/// GLM API usage configuration
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct GlmUsageConfig {
+    /// Whether to enable GLM API calls
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+
+    /// Cache TTL in seconds
+    #[serde(default = "default_glm_cache_ttl")]
+    pub cache_ttl: u64,
+
+    /// API request timeout in milliseconds
+    #[serde(default = "default_glm_timeout_ms")]
+    pub timeout_ms: u64,
+
+    /// Number of retry attempts
+    #[serde(default = "default_glm_retry_attempts")]
+    pub retry_attempts: u32,
+
+    /// Threshold configuration
+    #[serde(default)]
+    pub thresholds: GlmThresholdsConfig,
+}
+
+impl Default for GlmUsageConfig {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            cache_ttl: default_glm_cache_ttl(),
+            timeout_ms: default_glm_timeout_ms(),
+            retry_attempts: default_glm_retry_attempts(),
+            thresholds: GlmThresholdsConfig::default(),
+        }
+    }
+}
+
+/// GLM usage thresholds
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct GlmThresholdsConfig {
+    /// Warning threshold percentage (yellow color)
+    #[serde(default = "default_glm_warning_threshold")]
+    pub warning: u8,
+
+    /// Danger threshold percentage (red color)
+    #[serde(default = "default_glm_danger_threshold")]
+    pub danger: u8,
+}
+
+impl Default for GlmThresholdsConfig {
+    fn default() -> Self {
+        Self {
+            warning: default_glm_warning_threshold(),
+            danger: default_glm_danger_threshold(),
+        }
+    }
+}
+
+/// Rate limit display configuration
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct RateLimitDisplayConfig {
+    /// Whether to show the progress bar for 5h token usage
+    #[serde(default = "default_true")]
+    pub show_5h_progress_bar: bool,
+
+    /// Whether to show the progress bar for 7d token usage
+    #[serde(default = "default_true")]
+    pub show_7d_progress_bar: bool,
+
+    /// Whether to show the reset countdown
+    #[serde(default = "default_true")]
+    pub show_countdown: bool,
+
+    /// Progress bar character width
+    #[serde(default = "default_rate_limit_progress_width")]
+    pub progress_width: u32,
+
+    /// 速率图标 - emoji
+    #[serde(default = "default_rate_limit_emoji_icon")]
+    pub emoji_icon: String,
+
+    /// 速率图标 - Nerd Font
+    #[serde(default = "default_rate_limit_nerd_icon")]
+    pub nerd_icon: String,
+
+    /// 速率图标 - 纯文本
+    #[serde(default = "default_rate_limit_text_icon")]
+    pub text_icon: String,
+
+    /// 倒计时图标 - emoji
+    #[serde(default = "default_rate_limit_timer_emoji_icon")]
+    pub timer_emoji_icon: String,
+
+    /// 倒计时图标 - Nerd Font
+    #[serde(default = "default_rate_limit_timer_nerd_icon")]
+    pub timer_nerd_icon: String,
+
+    /// 倒计时图标 - 纯文本
+    #[serde(default = "default_rate_limit_timer_text_icon")]
+    pub timer_text_icon: String,
+}
+
+impl Default for RateLimitDisplayConfig {
+    fn default() -> Self {
+        Self {
+            show_5h_progress_bar: true,
+            show_7d_progress_bar: true,
+            show_countdown: true,
+            progress_width: default_rate_limit_progress_width(),
+            emoji_icon: default_rate_limit_emoji_icon(),
+            nerd_icon: default_rate_limit_nerd_icon(),
+            text_icon: default_rate_limit_text_icon(),
+            timer_emoji_icon: default_rate_limit_timer_emoji_icon(),
+            timer_nerd_icon: default_rate_limit_timer_nerd_icon(),
+            timer_text_icon: default_rate_limit_timer_text_icon(),
+        }
+    }
+}
+
+const fn default_glm_cache_ttl() -> u64 {
+    300
+}
+
+const fn default_glm_timeout_ms() -> u64 {
+    5000
+}
+
+const fn default_glm_retry_attempts() -> u32 {
+    2
+}
+
+const fn default_glm_warning_threshold() -> u8 {
+    80
+}
+
+const fn default_glm_danger_threshold() -> u8 {
+    95
+}
+
+const fn default_rate_limit_progress_width() -> u32 {
+    8
+}
+
+fn default_rate_limit_emoji_icon() -> String {
+    "\u{1fa99}".to_string() // 🪙
+}
+
+fn default_rate_limit_nerd_icon() -> String {
+    "\u{f51e}".to_string()
+}
+
+fn default_rate_limit_text_icon() -> String {
+    "[R]".to_string()
+}
+
+fn default_rate_limit_timer_emoji_icon() -> String {
+    "\u{23f0}".to_string() // ⏰
+}
+
+fn default_rate_limit_timer_nerd_icon() -> String {
+    "\u{f017}".to_string()
+}
+
+fn default_rate_limit_timer_text_icon() -> String {
+    "\u{23f3}".to_string() // ⏳
 }

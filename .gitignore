@@ -34,3 +34,6 @@ Thumbs.db
 # npm packages (generated during build/publish)
 npm/**/*.tgz
 *.tgz
+.claude/commands/
+.claude/skills/
+openspec/

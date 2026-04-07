@@ -530,3 +530,120 @@ async fn test_all_presets() -> Result<()> {
 
     Ok(())
 }
+
+// ===== Rate Limit 集成测试 =====
+
+#[tokio::test]
+async fn test_rate_limit_preset_r() -> Result<()> {
+    let input = InputData {
+        model: Some(ModelInfo {
+            id: Some("claude-3.5-sonnet".to_string()),
+            display_name: None,
+        }),
+        ..Default::default()
+    };
+
+    let config = Config::default();
+    let options = GeneratorOptions::new().with_preset("R".to_string());
+    let mut generator = StatuslineGenerator::new(config, options);
+
+    // Without env vars, rate_limit produces no output → should not panic
+    let result = generator.generate(input).await?;
+    // Result may be empty since no GLM env vars are set
+    drop(result);
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_rate_limit_in_multi_component_preset() -> Result<()> {
+    let input = InputData {
+        model: Some(ModelInfo {
+            id: Some("claude-3.5-sonnet".to_string()),
+            display_name: None,
+        }),
+        git_branch: Some("main".to_string()),
+        ..Default::default()
+    };
+
+    let config = Config::default();
+    let options = GeneratorOptions::new().with_preset("PMBTR".to_string());
+    let mut generator = StatuslineGenerator::new(config, options);
+
+    let result = generator.generate(input).await?;
+    // Main line should have PMBT content
+    assert!(
+        !result.is_empty(),
+        "Should produce output from PMBT components"
+    );
+    // R won't produce visible output without GLM env vars, but should not crash
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_rate_limit_disabled_in_config() -> Result<()> {
+    let input = InputData {
+        model: Some(ModelInfo {
+            id: Some("claude-3.5-sonnet".to_string()),
+            display_name: None,
+        }),
+        ..Default::default()
+    };
+
+    let mut config = Config::default();
+    config.components.rate_limit.enabled = false;
+
+    let options = GeneratorOptions::new().with_preset("R".to_string());
+    let mut generator = StatuslineGenerator::new(config, options);
+
+    let result = generator.generate(input).await?;
+    // Should be empty or just not crash
+    drop(result);
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_rate_limit_does_not_break_main_line() -> Result<()> {
+    // Ensure rate_limit component doesn't interfere with main line rendering
+    let input = InputData {
+        model: Some(ModelInfo {
+            id: Some("claude-3.5-sonnet".to_string()),
+            display_name: None,
+        }),
+        git_branch: Some("main".to_string()),
+        cost: Some(CostInfo {
+            total_tokens: Some(1500),
+            cache_read_tokens: None,
+            cache_write_tokens: None,
+            input_tokens: None,
+            output_tokens: None,
+            total_cost_usd: None,
+            total_duration_ms: None,
+            total_api_duration_ms: None,
+            total_lines_added: None,
+            total_lines_removed: None,
+        }),
+        extra: serde_json::json!({
+            "__mock__": {
+                "tokensUsage": {
+                    "context_used": 1500u64
+                }
+            }
+        }),
+        ..Default::default()
+    };
+
+    let config = Config::default();
+    let options = GeneratorOptions::new().with_preset("PMBTR".to_string());
+    let mut generator = StatuslineGenerator::new(config, options);
+
+    let result = generator.generate(input).await?;
+    // Main line should still have content
+    assert!(!result.is_empty());
+    // Should contain model and branch info on main line
+    assert!(
+        result.contains("3.5-sonnet") || result.contains("claude"),
+        "Main line should contain model info"
+    );
+    assert!(result.contains("main"), "Main line should contain branch");
+    Ok(())
+}

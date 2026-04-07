@@ -12,6 +12,7 @@
 //!
 //! Core library for statusline generation
 
+pub mod api;
 pub mod components;
 pub mod config;
 pub mod core;

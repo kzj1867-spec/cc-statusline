@@ -4,6 +4,7 @@
 
 mod manager;
 mod project_resolver;
+pub mod rate_limit_cache;
 mod types;
 
 pub use manager::StorageManager;
