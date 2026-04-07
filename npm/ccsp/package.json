@@ -1,10 +1,10 @@
 {
-  "name": "ccsp",
-  "version": "3.1.0",
-  "description": "Claude Code Statusline Pro - Rust-powered statusline (short for claude-code-statusline-pro)",
+  "name": "@zach19/cc-statusline",
+  "version": "3.2.0",
+  "description": "Claude Code Statusline Pro - Rust-powered statusline",
   "license": "MIT",
   "bin": {
-    "ccsp": "index.js"
+    "cc-statusline": "index.js"
   },
   "files": [
     "index.js",
@@ -26,22 +26,22 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Wangnov/claude-code-statusline-pro.git"
+    "url": "https://github.com/kzj1867-spec/cc-statusline.git"
   },
   "bugs": {
-    "url": "https://github.com/Wangnov/claude-code-statusline-pro/issues"
+    "url": "https://github.com/kzj1867-spec/cc-statusline/issues"
   },
-  "homepage": "https://github.com/Wangnov/claude-code-statusline-pro",
-  "author": "wangnov",
+  "homepage": "https://github.com/kzj1867-spec/cc-statusline",
+  "author": "zach19",
   "engines": {
     "node": ">=16"
   },
   "optionalDependencies": {
-    "@wangnov/ccsp-macos-arm64": "^3.0.0",
-    "@wangnov/ccsp-macos-x64": "^3.0.0",
-    "@wangnov/ccsp-linux-x64": "^3.0.0",
-    "@wangnov/ccsp-linux-arm64": "^3.0.0",
-    "@wangnov/ccsp-windows-x64": "^3.0.0",
-    "@wangnov/ccsp-windows-arm64": "^3.0.0"
+    "@zach19/cc-statusline-macos-arm64": "^3.0.0",
+    "@zach19/cc-statusline-macos-x64": "^3.0.0",
+    "@zach19/cc-statusline-linux-x64": "^3.0.0",
+    "@zach19/cc-statusline-linux-arm64": "^3.0.0",
+    "@zach19/cc-statusline-windows-x64": "^3.0.0",
+    "@zach19/cc-statusline-windows-arm64": "^3.0.0"
   }
 }

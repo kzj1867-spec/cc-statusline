@@ -1,6 +1,6 @@
 {
-  "name": "@wangnov/ccsp-linux-x64",
-  "version": "3.1.0",
+  "name": "@zach19/cc-statusline-linux-x64",
+  "version": "3.2.0",
   "description": "ccsp prebuilt binary for Linux x64",
   "license": "MIT",
   "os": [
@@ -16,11 +16,11 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Wangnov/claude-code-statusline-pro.git"
+    "url": "https://github.com/kzj1867-spec/cc-statusline.git"
   },
   "bugs": {
-    "url": "https://github.com/Wangnov/claude-code-statusline-pro/issues"
+    "url": "https://github.com/kzj1867-spec/cc-statusline/issues"
   },
-  "homepage": "https://github.com/Wangnov/claude-code-statusline-pro",
-  "author": "wangnov"
+  "homepage": "https://github.com/kzj1867-spec/cc-statusline",
+  "author": "zach19"
 }

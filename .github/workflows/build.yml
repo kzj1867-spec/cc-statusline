@@ -155,21 +155,13 @@ jobs:
             (cd "${pkg_dir}" && npm pack)
           done
 
-      - name: Pack main package (ccsp)
+      - name: Pack main package (@zach19/cc-statusline)
         run: |
           set -euo pipefail
           # Copy README for npm display
           cp README.md npm/ccsp/
           rm -f npm/ccsp/*.tgz
           (cd npm/ccsp && npm pack)
-
-      - name: Pack legacy package (claude-code-statusline-pro)
-        run: |
-          set -euo pipefail
-          # Copy README for npm display
-          cp README.md npm/claude-code-statusline-pro/
-          rm -f npm/claude-code-statusline-pro/*.tgz
-          (cd npm/claude-code-statusline-pro && npm pack)
 
       - name: Read release version
         id: release-version
@@ -183,16 +175,14 @@ jobs:
           set -euo pipefail
           PLATFORM_TARBALL=$(ls npm/platforms/ccsp-linux-x64/*.tgz)
           MAIN_TARBALL=$(ls npm/ccsp/*.tgz)
-          LEGACY_TARBALL=$(ls npm/claude-code-statusline-pro/*.tgz)
 
           TMP_DIR=$(mktemp -d)
           trap 'rm -rf "$TMP_DIR"' EXIT
 
           # Install all packages in one command to let npm handle dependencies correctly
-          npm install --prefix "$TMP_DIR" --no-save "$PLATFORM_TARBALL" "$MAIN_TARBALL" "$LEGACY_TARBALL"
+          npm install --prefix "$TMP_DIR" --no-save "$PLATFORM_TARBALL" "$MAIN_TARBALL"
 
-          NODE_PATH="$TMP_DIR/node_modules" node "$TMP_DIR/node_modules/ccsp/index.js" --version
-          NODE_PATH="$TMP_DIR/node_modules" node "$TMP_DIR/node_modules/claude-code-statusline-pro/index.js" --help >/dev/null
+          NODE_PATH="$TMP_DIR/node_modules" node "$TMP_DIR/node_modules/@zach19/cc-statusline/index.js" --version
 
       - name: Ensure npm versions are unpublished
         env:
@@ -200,14 +190,13 @@ jobs:
         run: |
           set -euo pipefail
           packages=(
-            ccsp
-            claude-code-statusline-pro
-            @wangnov/ccsp-linux-x64
-            @wangnov/ccsp-linux-arm64
-            @wangnov/ccsp-macos-x64
-            @wangnov/ccsp-macos-arm64
-            @wangnov/ccsp-windows-x64
-            @wangnov/ccsp-windows-arm64
+            @zach19/cc-statusline
+            @zach19/cc-statusline-linux-x64
+            @zach19/cc-statusline-linux-arm64
+            @zach19/cc-statusline-macos-x64
+            @zach19/cc-statusline-macos-arm64
+            @zach19/cc-statusline-windows-x64
+            @zach19/cc-statusline-windows-arm64
           )
           for pkg in "${packages[@]}"; do
             if npm view "${pkg}@${VERSION}" > /dev/null 2>&1; then
@@ -226,7 +215,6 @@ jobs:
           done
 
           npm publish "$(ls npm/ccsp/*.tgz)" --access public
-          npm publish "$(ls npm/claude-code-statusline-pro/*.tgz)" --access public
 
       - name: Upload npm tarballs
         uses: actions/upload-artifact@v4
@@ -235,4 +223,3 @@ jobs:
           path: |
             npm/platforms/*/*.tgz
             npm/ccsp/*.tgz
-            npm/claude-code-statusline-pro/*.tgz

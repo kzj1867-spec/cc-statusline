@@ -16,7 +16,7 @@ function ensureBinary() {
   }
 
   console.error(
-    "[ccsp] Prebuilt binary not found. Try reinstalling with 'npm install --force ccsp' or compile it manually via 'cargo build --release'."
+    "[cc-statusline] Prebuilt binary not found. Try reinstalling with 'npm install --force @zach19/cc-statusline' or compile it manually via 'cargo build --release'."
   );
   process.exitCode = 1;
   return process.exit();

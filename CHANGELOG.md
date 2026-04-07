@@ -56,7 +56,7 @@
 
 - **包名变更**: 主包名从 `claude-code-statusline-pro` 改为 `ccsp`
   - 旧命令 `npx claude-code-statusline-pro@latest` 仍可用，但会显示迁移提示
-  - 建议更新为 `npx ccsp@latest`
+  - 建议更新为 `npx @zach19/cc-statusline@latest`
 - **配置文件格式**: 从 JSON 迁移到 TOML 格式
 - **配置文件路径**:
   - 项目级: `~/.claude/projects/{project-hash}/statusline-pro/config.toml`
@@ -120,7 +120,7 @@
    {
      "statusLine": {
        "type": "command",
-       "command": "npx ccsp@latest"
+       "command": "npx @zach19/cc-statusline@latest"
      }
    }
    ```
@@ -128,7 +128,7 @@
 2. **初始化新配置**:
 
    ```bash
-   npx ccsp@latest config init -w
+   npx @zach19/cc-statusline@latest config init -w
    ```
 
 3. **迁移旧配置**:
@@ -136,10 +136,10 @@
 
 ### 🔗 链接
 
-- [GitHub 仓库](https://github.com/wangnov/claude-code-statusline-pro)
-- [NPM 包 (ccsp)](https://www.npmjs.com/package/ccsp)
+- [GitHub 仓库](https://github.com/kzj1867-spec/cc-statusline)
+- [NPM 包 (@zach19/cc-statusline)](https://www.npmjs.com/package/@zach19/cc-statusline)
 - [NPM 包 (旧名)](https://www.npmjs.com/package/claude-code-statusline-pro)
-- [问题反馈](https://github.com/wangnov/claude-code-statusline-pro/issues)
+- [问题反馈](https://github.com/kzj1867-spec/cc-statusline/issues)
 
 ---
 
@@ -175,5 +175,5 @@
 如果你发现任何问题或有新功能建议，请：
 
 1. 查看 [CONTRIBUTING.md](./CONTRIBUTING.md)
-2. 提交 [Issue](https://github.com/wangnov/claude-code-statusline-pro/issues)
-3. 提交 [Pull Request](https://github.com/wangnov/claude-code-statusline-pro/pulls)
+2. 提交 [Issue](https://github.com/kzj1867-spec/cc-statusline/issues)
+3. 提交 [Pull Request](https://github.com/kzj1867-spec/cc-statusline/pulls)

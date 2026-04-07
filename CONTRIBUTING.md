@@ -66,8 +66,8 @@
 #### 克隆仓库
 
 ```bash
-git clone https://github.com/wangnov/claude-code-statusline-pro.git
-cd claude-code-statusline-pro
+git clone https://github.com/kzj1867-spec/cc-statusline.git
+cd cc-statusline
 ```
 
 #### 安装依赖
@@ -456,7 +456,7 @@ A: 请先提交 Issue 讨论功能设计，获得认可后再开始开发。
 
 如果你在贡献过程中遇到任何问题：
 
-- 📧 提交 [Issue](https://github.com/wangnov/claude-code-statusline-pro/issues)
+- 📧 提交 [Issue](https://github.com/kzj1867-spec/cc-statusline/issues)
 - 💬 在现有 PR 中评论
 - 📖 查看 [AGENTS.md](./AGENTS.md) 了解开发流程
 
@@ -528,8 +528,8 @@ By participating in this project, you agree to abide by our code of conduct:
 #### Clone Repository
 
 ```bash
-git clone https://github.com/wangnov/claude-code-statusline-pro.git
-cd claude-code-statusline-pro
+git clone https://github.com/kzj1867-spec/cc-statusline.git
+cd cc-statusline
 ```
 
 #### Install Dependencies
@@ -868,7 +868,7 @@ git push origin vX.Y.Z
 
 If you encounter any issues while contributing:
 
-- 📧 Submit an [Issue](https://github.com/wangnov/claude-code-statusline-pro/issues)
+- 📧 Submit an [Issue](https://github.com/kzj1867-spec/cc-statusline/issues)
 - 💬 Comment on existing PRs
 - 📖 Check [AGENTS.md](./AGENTS.md) for development workflow
 

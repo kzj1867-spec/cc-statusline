@@ -1,13 +1,13 @@
 [package]
 name = "claude-code-statusline-pro"
-version = "3.1.0"
+version = "3.2.0"
 edition = "2021"
 rust-version = "1.85"
-authors = ["wangnov"]
+authors = ["zach19"]
 license = "MIT"
 description = "Enhanced statusline for Claude Code with 10x performance"
-repository = "https://github.com/wangnov/claude-code-statusline-pro"
-homepage = "https://github.com/wangnov/claude-code-statusline-pro"
+repository = "https://github.com/kzj1867-spec/cc-statusline"
+homepage = "https://github.com/kzj1867-spec/cc-statusline"
 readme = "README.md"
 keywords = ["cli", "statusline", "claude", "terminal", "git"]
 categories = ["command-line-utilities", "development-tools"]

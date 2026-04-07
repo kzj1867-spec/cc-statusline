@@ -2,7 +2,6 @@
   "private": true,
   "workspaces": [
     "npm/ccsp",
-    "npm/claude-code-statusline-pro",
     "npm/platforms/*"
   ],
   "scripts": {
