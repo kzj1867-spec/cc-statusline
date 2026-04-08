@@ -74,8 +74,6 @@ npm --version
 }
 ```
 
-> 💡 **兼容说明**：旧命令 `npx @amadeus19/cc-statusline@latest` 仍会继续工作并自动调用新包，但将显示迁移提示。建议尽快将现有配置更新为 `npx @amadeus19/cc-statusline@latest` 以保持一致。
-
 保存文件后，重新打开Claude Code即可看到专业版状态栏！
 
 #### 验证安装
